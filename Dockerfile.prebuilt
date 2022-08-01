@@ -1,0 +1,42 @@
+# syntax = docker/dockerfile:1.4.0
+
+ARG S6_OVERLAY_VERSION="v3.1.1.2"
+ARG S6_OVERLAY_MAJOR="3"
+
+ARG FROM_IMAGE="moonbuggy2000/fetcher:latest"
+ARG BUILDPLATFORM="linux/amd64"
+
+## get add-contenv
+#
+FROM --platform="${BUILDPLATFORM}" "moonbuggy2000/s6-add-contenv:s6-overlay-v${S6_OVERLAY_MAJOR}" AS add-contenv
+
+## get s6 overlay
+#
+FROM --platform="${BUILDPLATFORM}" "moonbuggy2000/fetcher:latest" AS s6-overlay
+
+WORKDIR /s6_root/
+
+# get noarch files first, so they're cached for all builds
+ARG S6_OVERLAY_VERSION
+ARG S6_OVERLAY_MAJOR
+ARG S6_URL="https://github.com/just-containers/s6-overlay/releases/download/${S6_OVERLAY_VERSION}"
+RUN if [ "${S6_OVERLAY_MAJOR}" -gt 2 ]; then \
+    wget --no-check-certificate -qO- "${S6_URL}/s6-overlay-noarch.tar.xz" | tar xJf -; \
+    wget --no-check-certificate -qO- "${S6_URL}/s6-overlay-symlinks-noarch.tar.xz" | tar xJf -; \
+    wget --no-check-certificate -qO- "${S6_URL}/s6-overlay-symlinks-arch.tar.xz" | tar xJf -; \
+  fi
+
+# get arch-specific files
+ARG S6_ARCH="x86_64"
+ARG S6_V2_ARCH
+RUN if [ "${S6_OVERLAY_MAJOR}" -gt 2 ]; then \
+    wget --no-check-certificate -qO- "${S6_URL}/s6-overlay-${S6_ARCH}.tar.xz" | tar xJf -; \
+  else \
+    wget --no-check-certificate -qO- "${S6_URL}/s6-overlay-${S6_V2_ARCH:-$S6_ARCH}.tar.gz" | tar xzf -; \
+  fi
+
+## build final image
+#
+FROM --platform="${BUILDPLATFORM}" scratch
+COPY --from=s6-overlay /s6_root/ /
+COPY --from=add-contenv / /

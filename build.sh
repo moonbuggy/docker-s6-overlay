@@ -8,7 +8,7 @@
 
 DOCKER_REPO="${DOCKER_REPO:-moonbuggy2000/s6-overlay}"
 
-all_tags='latest tarballs'
-default_tag='latest'
+all_tags='latest tarballs prebuilt'
+default_tag='latest prebuilt'
 
 . "hooks/.build.sh"

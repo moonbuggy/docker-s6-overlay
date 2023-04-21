@@ -4,7 +4,7 @@ Images with statically built [s6-overlay][s6-repo] and [s6-add-contenv](https://
 These can be used during multi-stage builds to install s6-overlay into an image. It's easier than making sure any s6-fetching stages in multi-arch builds are identical across different projects and relying on `docker build` caching the layer.
 
 ## Usage
-```
+```dockerfile
 ## get s6 overlay
 FROM "moonbuggy2000/s6-overlay:${S6_VERSION}-${S6_ARCH}" AS s6-overlay
 
@@ -21,7 +21,7 @@ Images are tagged in the form `<s6 version>-<s6 arch>`. Tags including `-prebuil
 Valid `<s6-arch>`: `aarch64/arm64`, `amd64`, `arm`, `armhf`, `i486/x86`, `i686`, `mips64le`, `ppc64le`, `riscv64`, `s390x`
 
 ## Building
-The `./build.sh` script takes arguments in the form `<s6 version>(-<build type>-)(-<s6 arch>)`
+The `./build.sh` script takes arguments in the form `<s6 version>(-<build type>)(-<s6 arch>)`
 
 A default build, with no arguments, will create images for all possible architectures containing the s6 overlay and s6 add-contenv files, ready to copy into another image in a multi-stage build.
 
@@ -41,7 +41,7 @@ Available architectures are generally the same as those in the image tags above.
 All possible architectures will be built if no `<s6 arch>` is specified.
 
 #### Examples
-```
+```sh
 # latest version on all architectures
 ./build.sh latest
 

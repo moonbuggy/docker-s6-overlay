@@ -139,7 +139,7 @@ ENV PATH="/${CROSS_ARCH}-linux-${CROSS_ABI}/bin:${PATH}" \
 
 WORKDIR /buildroot/src/skalibs
 COPY --from=src_skalibs /src .
-RUN DESTDIR=/buildroot/out/staging ./configure --host="${CROSS_TRIPLET}" --enable-slashpackage --enable-static-libc --disable-shared --with-default-path=/command:/buildroot/sbin:/buildroot/bin:/usr/sbin:/usr/bin:/sbin:/bin --with-sysdep-devurandom=yes --with-sysdep-grndinsecure=no \
+RUN DESTDIR=/buildroot/out/staging ./configure --host="${CROSS_TRIPLET}" --enable-slashpackage --enable-static-libc --disable-shared --with-default-path=/command:/buildroot/sbin:/buildroot/bin:/usr/sbin:/usr/bin:/sbin:/bin --with-sysdep-devurandom=yes --with-sysdep-grndinsecure=no --with-sysdep-posixspawn=no --with-sysdep-posixspawnearlyreturn=no \
   && make -j$(nproc) \
   && make strip \
   && make DESTDIR=/buildroot/out/staging -L install update global-links

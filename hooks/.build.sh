@@ -127,6 +127,7 @@ check_updates () {
 	done
 	>&2 printf "\n"
 
+	ifFuncSetVar 'updateable' 'custom_updateable_tags' "${updateable}"
 	echo "${updateable}"
 }
 

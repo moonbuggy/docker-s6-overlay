@@ -109,7 +109,8 @@ mips64le:
 
 ppc64le:
   TARGET_ARCH_TAG: ppc64le
-  S6_ARCH: ppc64le
+  S6_ARCH: powerpc64le
+  S6_ARCH_V2: ppc64le
   PLATFORM: linux/ppc64le
   CROSS_ARCH: powerpc64le
   CROSS_ABI: musl

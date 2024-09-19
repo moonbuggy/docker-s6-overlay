@@ -9,6 +9,7 @@ ARG CROSS_ARCH="x86_64"
 ARG CROSS_ABI="musl"
 ARG CROSS_TRIPLET="${CROSS_ARCH}-linux-${CROSS_ABI}"
 
+ARG BEARSSL_COMMIT="79c060eea3eea1257797f15ea1608a9a9923aa6f"
 ARG BEARSSL_VERSION="0.6"
 ARG BEARSSL_REPO="bearssl.org/git/BearSSL"
 ARG EXECLINE_VERSION="v2.9.0.1"
@@ -45,9 +46,11 @@ FROM --platform="${BUILDPLATFORM}" "moonbuggy2000/s6-add-contenv:s6-overlay-v${S
 FROM --platform="${BUILDPLATFORM}" moonbuggy2000/fetcher:latest AS fetcher
 
 FROM fetcher AS src_bearssl
-ARG BEARSSL_VERSION
+ARG BEARSSL_COMMIT
 WORKDIR /src
-RUN wget --no-check-certificate -qO- "https://bearssl.org/bearssl-${BEARSSL_VERSION}.tar.gz" | tar xzf - --strip 1
+# RUN wget --no-check-certificate -qO- "https://bearssl.org/bearssl-${BEARSSL_VERSION}.tar.gz" | tar xzf - --strip 1
+RUN git clone https://www.bearssl.org/git/BearSSL . \
+  && if [ ! -z "${BEARSSL_COMMIT}" ]; then git reset --hard "${BEARSSL_COMMIT}"; fi
 
 FROM fetcher AS src_execline
 ARG EXECLINE_REPO
@@ -119,7 +122,15 @@ RUN wget --no-check-certificate -qO- "https://github.com/${SKALIBS_REPO}/archive
 ## build the source
 #
 FROM --platform="${BUILDPLATFORM}" "muslcc/x86_64:${CROSS_TRIPLET}" AS builder
-RUN apk -U add --no-cache bash llvm make git tar xz
+ARG APK_PROXY=""
+RUN if [ ! -z "${APK_PROXY}" ]; then \
+    ALPINE_MINOR="$(sed -En 's|VERSION_ID=([0-9]\.[0-9]*).*|\1|p' /etc/os-release)"; \
+    mv /etc/apk/repositories /etc/apk/repositories.bak; \
+		echo "${APK_PROXY}/alpine/v${ALPINE_MINOR}/main" >/etc/apk/repositories; \
+		echo "${APK_PROXY}/alpine/v${ALPINE_MINOR}/community" >>/etc/apk/repositories; \
+	fi \
+  && apk -U add --no-cache bash llvm make git tar xz \
+  && (mv -f /etc/apk/repositories.bak /etc/apk/repositories >/dev/null 2>&1 || true)
 
 ARG CROSS_ARCH
 ARG CROSS_ABI

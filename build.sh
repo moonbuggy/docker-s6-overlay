@@ -13,7 +13,8 @@ custom_versions () {
 }
 
 custom_source_latest () {
-  echo "$(git_repo_tags ${SOURCE_PACKAGES[S6_OVERLAY]} | grep -Po "(${ver}[\.\d]*|$)" | sort -uV | tail -n1)"
+  echo "$(git_repo_tags ${SOURCE_PACKAGES[S6_OVERLAY]} | \
+        grep -Po "(${ver}[\.\d]*|$)" | sort -uV | tail -n1)"
 }
 
 custom_updateable_tags () {
